@@ -1,0 +1,152 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsbsy}
+\usepackage{mathrsfs}
+\usepackage{appendix}
+\usepackage{amsthm}
+\usepackage{bbold}
+\usepackage{epstopdf}
+\usepackage{stmaryrd}
+\usepackage{subcaption}
+\usepackage[]{algorithm2e}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\bb}[1]{\mathbf{#1}}
+\newcommand{\pd}[2]{\frac{\partial {#1}}{\partial {#2}}}
+\newcommand{\parti}[1]{\pd{}{#1}}
+\title{TP2 for Optim Image}
+\author{Leman FENG\\ Email: flm8620@gmail.com\\Website: lemanfeng.com}
+
+\begin{document}
+	\maketitle
+\section*{Gradient Projeté}
+\subsection*{1.1}
+$ \nabla J = 2A^T(Ax-b) $
+\subsection*{1.2}
+Prove J is strongly convex:
+$$
+J(x+h) = J(x)+ \nabla J(x)^T h + h^TA^TAh
+$$
+Notice that
+$$
+h^TA^TAh = <h, A^TAh> \geq \lambda_{min} \lVert h \rVert^2 
+$$
+where $\lambda_{min}$ is the minimum eigenvalue of matrix $A^TA$. So 
+$$
+J(x+h) \geq J(x)+ \nabla J(x)^T h + \frac{2\lambda_{min}}{2} \lVert h \rVert^2 
+$$
+the strongly convex parameter is $\mu = 2\lambda_{min}$.
+
+$$
+\lVert \nabla J(x_1)-\nabla J(x_2) \rVert = 2 \lVert A^TA(x_1-x_2) \rVert \leq 2\lVert A^TA \rVert \lVert x_1-x_2 \rVert
+$$
+So the Lipshitzien constant $M$ is $2\lVert A^TA \rVert$. Because $A^TA$ is symmetric, so $\lVert A^TA \rVert$ = $\lambda_{max}$, the max eigenvalue of $A^TA$.
+\subsection*{1.3}
+\begin{algorithm}[H]
+	\KwData{$x_0, \tau, \epsilon$}
+	$x \leftarrow x_0$\\
+	\While{$x$ not converged}{
+		$x \leftarrow x - \tau \nabla J$\\
+		$x \leftarrow \max{(0,x)}$ 
+	}
+\end{algorithm}
+According to Theorem 31 in poly, $\mu = 2\lambda_{min}$ and $M=2\lambda_{max}$, so the step $\tau$ should be smaller than $\frac{2\mu}{M^2} = \frac{4\lambda_{min}}{4\lambda_{max}^2} = \frac{\lambda_{min}}{\lambda_{max}^2}$
+
+\subsection*{1.5}
+Solution is $[0,0.4615]$
+\subsection*{1.6}
+We want to find a vector $\mathbf{b}$ such that at point $[5,0]$ constrain $x_1 \geq 0$ is not actived and constrain $x_2\geq 0$ is actived.
+
+Kuhn Tucker relation gives:
+
+$$
+\nabla J(\mathbf{x}) + \lambda [0,-1]^T = 0, \lambda > 0
+$$
+
+$$
+\Rightarrow [10+b_2-b_1, -5-2b_1-3b_2] = [0, \lambda/2]
+$$
+
+$$
+\Rightarrow b_1 = 10+b_2,\ b_2 < -5
+$$
+
+We can take $\mathbf{b} = [0,-10]^T$
+
+\section*{Gradient projete bis}
+\subsection*{1}
+\subsubsection*{a}
+C is a cylinder with infinite height. C is convex because:
+$$
+f(x_1,x_2,x_3)=x_1^2+x_2^2
+$$
+is a convex function, so $f\leq 1$ defines a convex set.
+
+\subsubsection*{b}
+\[
+P_C(\mathbf{x}) =
+\begin{cases}
+[x_1/\sqrt{x_1^2+x_2^2},x_2/\sqrt{x_1^2+x_2^2},x_3] & x_1^2+x_2^2 > 1\\
+[x_1,x_2,x_3] & else
+\end{cases}
+\]
+
+\subsection*{2}
+\subsubsection*{a}
+There exists a unique solution because $C$ is a convex set and $J$ is strongly convex.
+\subsubsection*{b}\begin{algorithm}[H]
+	\KwData{$x_0, \tau, \epsilon$}
+	$x \leftarrow x_0$\\
+	\While{$x$ not converged}{
+		$x \leftarrow x - \tau \nabla J$\\
+		$x \leftarrow P_C{x}$ 
+	}
+\end{algorithm}
+Step should be smaller than  $\frac{2\mu}{M^2} = \frac{\lambda_{min}}{\lambda_{max}^2} = 0.0093$
+\subsubsection*{d}
+$x^* = [0.9911,   -0.1334,    0.8854], J=1.609$
+\subsubsection*{e}
+When $\tau > 0.089$, the algorithm diverges.
+\section*{3 Uzawa}
+\subsection*{1}
+$\forall \mathbf{x}\neq 0$ 
+
+\begin{equation*}
+\begin{split}
+\mathbf{x}^T A \mathbf{x} &= 2x_1^2 - x_1x_2 +2x_2^2 - x_2x_3+\dots+x_n^2\\
+&= x_1^2 + (x_1-x_2)^2 + \dots + (x_{n-1}+x_n)^2 + x_n^2\\
+&> 0\\
+\end{split}
+\end{equation*}
+
+$x^TAx$ correspond to $\int | f' |$
+\subsection*{2}
+\begin{equation*}
+L = \frac{1}{2} x^TAx - b^Tx +\lambda^TCx-\lambda^Td
+\end{equation*}
+
+\subsection*{3}
+Use the result from Question 1, function $\frac{1}{2}x^TAx-b^x$ is strongly convex with parameter $\mu=\lambda_{\text{min}}(A)$, the step $\rho$ should verify $0<\rho<\frac{2\lambda_{\text{min}}(A)}{\lVert C\rVert^2}$
+
+\subsection*{4}
+Algorithm converged to
+
+$$
+\lambda = [0.3661, 0.8542, 1.70171], x = [0.4915,0.2271,    1.0373,    1.7017,    2.7017,    1.0000
+]
+$$
+
+All $\lambda_i$ is positive, so all constraints are actived.
+
+$\nabla J = Ax-b= [-0.2441,   -2.0746,   -0.8542,   -1.3356,    1.7017,   -1.7017]$
+
+$\lambda \nabla (Cx-d) = [0.2441,    2.0746,    0.8542,    1.3356,   -1.7017,    1.7017]$
+
+Clearly we have $\nabla J + \lambda \nabla G = 0$
+
+\subsection*{5}
+When replace $b$ by $-b$, $\lambda=[0,0,0]$, which means all constraints are not actived.
+
+\end{document}
