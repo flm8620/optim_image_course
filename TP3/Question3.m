@@ -1,3 +1,8 @@
+%% 3.1
+clc;
+clear all;
+close all;
+
 %load gatlin2;
 X = double(imread('lenna.gif'));
 % X = X/max(max(X));
@@ -18,14 +23,11 @@ title('im & laplacien');
 
 %F = imnoise(X,'gaussian',0,0.001);
 F = X + 10*randn(size(X));
-figure(4);
-imshow(F,[]);
-colorbar;
 
 gradF = @(f,u,l) 2*(u-f)-2*l*laplacien_im(u);
 u=zeros(size(F));
-lambda = 5;
-N = 1000;
+lambda = 2.5;
+N = 250;
 history_g = zeros(N,1);
 history_J = zeros(N,1);
 for i=1:N
@@ -37,46 +39,31 @@ for i=1:N
     history_J(i) = J;
 end
 figure(5);
-imshow([F,u],[]);
-
+imshow([X,F,u],[]);
+title('left to right: original, noised, recovered')
 figure(6);
-plot(1:N, history_g);
-title('gradient norm')
+plot(1:N, log(history_g));
+title('log gradient norm')
 figure(7);
-plot(1:N, history_J);
-title('energy')
-%%
+plot(1:N, log(history_J));
+title('log energy')
+%% 3.2
+clc;
+clear all;
+close all;
 rng(123);
-load gatlin2;
 X = double(imread('lenna.gif'));
-%X = double(sum(imread('len_top.jpg'),3))/3;
 F = X + 10*randn(size(X));
 S = fsym(F);
 [M,N]=size(S);
-% imshow(S,[]);
-lambda = 10;
+lambda = 2.5;
 
 FS = fft2(S);
-
-figure(8);
-imshow(fftshift(angle(FS)),[-pi,pi]);
-colormap(gca,hsv);
-colorbar;
-title('angle of Fourier of sym image')
-
-%[p,q]=meshgrid([0:N/2 -N/2+1:-1], [0:M/2 -M/2+1:-1]);
 [p,q]=meshgrid(0:N-1, 0:M-1);
 Fu = FS./(1+4*lambda*(sin(pi*p/N).^2 + sin(pi*q/M).^2));
 u = ifft2(Fu);
-
-
-figure(9);
-imshow(angle(u),[-pi,pi]);
-colormap(gca,hsv);
-colorbar;
-title('angle of u')
-
 u = real(unsym(u));
+
 figure(10);
 imshow([X,F,u],[]);
 title('original, noisy, and recovered images');
